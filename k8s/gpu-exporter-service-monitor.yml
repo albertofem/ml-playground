@@ -1,0 +1,16 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: gpu-exporter-monitor
+  namespace: observability
+  labels:
+    app.kubernetes.io/name: nvidia-gpu-exporter
+    release: kube-prom-stack # need this as it's hardcoded in the kube prometheus stack helm deployment
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: nvidia-gpu-exporter
+  endpoints:
+    - port: http
+      interval: 5s
+      path: /metrics

@@ -1,0 +1,55 @@
+#@ load("@ytt:data", "data")
+
+apiVersion: argoproj.io/v1alpha1
+kind: Workflow
+metadata:
+  generateName: bert-spam-detector
+  namespace: argo
+spec:
+  entrypoint: bert-spam-detector
+  templates:
+    - name: bert-spam-detector
+      steps:
+      - - name: bert-spam-detector-training
+          template: bert-spam-detector-training
+
+    - name: bert-spam-detector-training
+      container:
+        image: localhost:32000/bert-spam-detector-train:latest
+        command: [ "python" ]
+        args:
+          - training/train.py
+          - --training_data
+          - data/spam-labels.csv
+          - --model_output_directory
+          - /tmp/mldata/
+        resources:
+          limits:
+            nvidia.com/gpu: "1"
+        volumeMounts:
+          - name: mldata-volume
+            mountPath: /tmp/mldata
+    - name: bert-spam-detector-archive
+      container:
+        image: pytorch/torchserve:latest
+        command: ["torch-model-archiver"]
+        args:
+          - --model-name
+          - densenet161
+          - --version 1.0
+          - --model-file
+          - /home/model-server/examples/image_classifier/densenet_161/model.py
+          - --serialized-file
+          - /home/model-server/examples/image_classifier/densenet161-8d451a50.pth
+          - --export-path
+          - /home/model-server/model-store
+          - --extra-files
+          - /home/model-server/examples/image_classifier/index_to_name.json
+          - --handler
+          - image_classifier
+
+  volumes:
+    - name: mldata-volume
+      hostPath:
+        path: #@ data.values.model_dir
+        type: Directory

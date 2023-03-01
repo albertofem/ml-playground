@@ -1,0 +1,32 @@
+version: '3'
+
+includes:
+  infrastructure: ./infrastructure
+
+env:
+  DOCKER_REPOSITORY: '{{if .REMOTE_HOST}}{{.REMOTE_HOST}}{{else}}localhost{{end}}:32000' # 32000 microk8s registry port
+
+tasks:
+  docker-train:
+    cmds:
+      - docker build . -t {{.DOCKER_REPOSITORY}}/bert-spam-detector-train:latest
+
+  docker-train-push:
+    cmds:
+      - docker push {{.DOCKER_REPOSITORY}}/bert-spam-detector-train
+
+  docker:
+    cmds:
+      - task: docker-train
+      - task: docker-train-push
+
+
+  deploy-train-clear:
+    cmds:
+      - kubectl delete bert-spam-detector-training -n bert-spam-detector-training &2>1
+
+  deploy-train:
+    deps:
+      - task: deploy-train-clear
+    cmds:
+      - ytt --data-value model_dir={{.MODEL_STORE_DIR}} -f k8s/train.yml | kubectl create -f -
