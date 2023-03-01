@@ -16,7 +16,7 @@ spec:
     - name: bert-spam-detector-training
       container:
         image: localhost:32000/bert-spam-detector-train:latest
-        command: [ "python" ]
+        command: ["python"]
         args:
           - training/train.py
           - --training_data
@@ -35,18 +35,13 @@ spec:
         command: ["torch-model-archiver"]
         args:
           - --model-name
-          - densenet161
-          - --version 1.0
+          - bert-spam-detector
+          - --version
+          - 1.0
           - --model-file
-          - /home/model-server/examples/image_classifier/densenet_161/model.py
-          - --serialized-file
-          - /home/model-server/examples/image_classifier/densenet161-8d451a50.pth
-          - --export-path
-          - /home/model-server/model-store
-          - --extra-files
-          - /home/model-server/examples/image_classifier/index_to_name.json
+          - /tmp/mldata/saved_weights.pth
           - --handler
-          - image_classifier
+          - inference/transformerhandler.py
 
   volumes:
     - name: mldata-volume
