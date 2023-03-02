@@ -20,13 +20,19 @@ tasks:
       - task: docker-train
       - task: docker-train-push
 
-
-  deploy-train-clear:
-    cmds:
-      - kubectl delete bert-spam-detector-training -n bert-spam-detector-training &2>1
-
   deploy-train:
-    deps:
-      - task: deploy-train-clear
     cmds:
       - ytt --data-value model_dir={{.MODEL_STORE_DIR}} -f k8s/train.yml | kubectl create -f -
+
+  deploy-clean-torchserve:
+    cmds:
+      - kubectl delete deploy bert-spam-detector -n inference
+
+  deploy-torchserve:
+    cmds:
+      - ytt --data-value model_dir={{.MODEL_STORE_DIR}} -f k8s/torchserve.yml | kubectl create -f -
+
+  train:
+    cmds:
+      - task: docker
+      - task: deploy-train

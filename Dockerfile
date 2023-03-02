@@ -21,3 +21,13 @@ COPY --from=builder /app/requirements.txt .
 RUN pip install --no-cache /wheels/*
 
 COPY . /app
+
+# Install java for Torchserve (TODO: move to different containers)
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends wget gnupg2 software-properties-common
+
+RUN wget -O- https://apt.corretto.aws/corretto.key | apt-key add -
+RUN add-apt-repository 'deb https://apt.corretto.aws stable main'
+
+RUN apt-get update; apt-get install -y java-11-amazon-corretto-jdk

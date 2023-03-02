@@ -62,3 +62,4 @@ tasks:
     deps:
       - task: serve-prometheus
       - task: serve-grafana
+      - task: serve-argo

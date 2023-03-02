@@ -7,11 +7,14 @@ from transformers import AutoModel, BertTokenizerFast
 from torch.utils.data import TensorDataset, DataLoader, RandomSampler, SequentialSampler
 from sklearn.utils.class_weight import compute_class_weight
 import argparse
+import os
 
 parser = argparse.ArgumentParser(description='Argument Parser')
 
 parser.add_argument('--training_data_file', type=str, required=True, help='Location of the training data')
 parser.add_argument('--model_output_dir', type=str, required=True, help='Directory to output the model')
+parser.add_argument('--transformer_cache_dir', type=str, required=True, help='Directory to download transformers model data cache')
+parser.add_argument('--bert_revision', type=str, required=True, help='Revision for the BERT model (commit or branch)')
 
 args = parser.parse_args()
 
@@ -59,9 +62,12 @@ class BertSpamDetectorModel(nn.Module):
 
 class BertSpamDetectorTrainer:
     def __init__(self):
+        if not os.path.exists(args.model_output_dir):
+            os.makedirs(args.model_output_dir)
+
         self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
-        self.df = pd.read_csv(args.training_data)
+        self.df = pd.read_csv(args.training_data_file)
 
         self.train_text, \
             self.temp_text, \
@@ -81,9 +87,13 @@ class BertSpamDetectorTrainer:
                                                 test_size=0.5,
                                                 stratify=self.temp_labels)
 
-        self.bert = AutoModel.from_pretrained('bert-base-uncased')
+        self.bert = AutoModel.from_pretrained('bert-base-uncased',
+                                              cache_dir=args.transformer_cache_dir,
+                                              revision=args.bert_revision)
 
-        self.tokenizer = BertTokenizerFast.from_pretrained('bert-base-uncased')
+        self.tokenizer = BertTokenizerFast.from_pretrained('bert-base-uncased',
+                                                           cache_dir=args.transformer_cache_dir,
+                                                           revision=args.bert_revision)
 
         self.max_seq_len = 25
 
@@ -238,10 +248,15 @@ class BertSpamDetectorTrainer:
 
             if valid_loss < best_valid_loss:
                 best_valid_loss = valid_loss
-                torch.save(self.model.state_dict(), '{}/saved_weights.pt'.format(args.model_output_directory))
+                torch.save(self.model.state_dict(), '{}/pytorch_model.bin'.format(args.model_output_dir))
 
             train_losses.append(train_loss)
             valid_losses.append(valid_loss)
 
             print(f'\nTraining Loss: {train_loss:.3f}')
             print(f'Validation Loss: {valid_loss:.3f}')
+
+
+if __name__ == "__main__":
+    trainer = BertSpamDetectorTrainer()
+    trainer.run()

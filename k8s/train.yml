@@ -12,6 +12,8 @@ spec:
       steps:
       - - name: bert-spam-detector-training
           template: bert-spam-detector-training
+      - - name: bert-spam-detector-archive
+          template: bert-spam-detector-archive
 
     - name: bert-spam-detector-training
       container:
@@ -19,32 +21,44 @@ spec:
         command: ["python"]
         args:
           - training/train.py
-          - --training_data
+          - --training_data_file
           - data/spam-labels.csv
-          - --model_output_directory
-          - /tmp/mldata/
+          - --model_output_dir
+          - /var/ml/data/bert-spam-detector/
+          - --transformer_cache_dir
+          - /var/ml/data/cache/
+          - --bert_revision
+          - 0a6aa9128b6194f4f3c4db429b6cb4891cdb421b
         resources:
           limits:
             nvidia.com/gpu: "1"
         volumeMounts:
-          - name: mldata-volume
-            mountPath: /tmp/mldata
+          - name: ml-volume
+            mountPath: /var/ml/data
     - name: bert-spam-detector-archive
       container:
-        image: pytorch/torchserve:latest
+        image: localhost:32000/bert-spam-detector-train:latest
         command: ["torch-model-archiver"]
         args:
           - --model-name
           - bert-spam-detector
           - --version
-          - 1.0
-          - --model-file
-          - /tmp/mldata/saved_weights.pth
+          - "1.0"
+          - --serialized-file
+          - /var/ml/data/bert-spam-detector/pytorch_model.bin
           - --handler
           - inference/transformerhandler.py
+          - --export-path
+          - /var/ml/data/bert-spam-detector/
+          - --force
+          - --extra-files
+          - /var/ml/data/cache/models--bert-base-uncased/snapshots/0a6aa9128b6194f4f3c4db429b6cb4891cdb421b/config.json,/var/ml/data/cache/models--bert-base-uncased/snapshots/0a6aa9128b6194f4f3c4db429b6cb4891cdb421b/tokenizer.json,/var/ml/data/cache/models--bert-base-uncased/snapshots/0a6aa9128b6194f4f3c4db429b6cb4891cdb421b/tokenizer_config.json,/var/ml/data/cache/models--bert-base-uncased/snapshots/0a6aa9128b6194f4f3c4db429b6cb4891cdb421b/vocab.txt
+        volumeMounts:
+          - name: ml-volume
+            mountPath: /var/ml/data
 
   volumes:
-    - name: mldata-volume
+    - name: ml-volume
       hostPath:
         path: #@ data.values.model_dir
         type: Directory

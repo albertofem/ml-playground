@@ -1,0 +1,49 @@
+#@ load("@ytt:data", "data")
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bert-spam-detector
+  namespace: inference
+  labels:
+    app: bert-spam-detector
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: bert-spam-detector
+  template:
+    metadata:
+      labels:
+        app: bert-spam-detector
+    spec:
+      containers:
+        - name: bert-spam-detector-torchserve
+          image: localhost:32000/bert-spam-detector-train:latest
+          command: ["torchserve"]
+          args:
+          - --model-store
+          - /var/ml/data/bert-spam-detector/
+          - --models
+          - all
+          - --foreground
+          - --start
+          - --no-config-snapshots
+          ports:
+            - containerPort: 8080
+              name: inference
+            - containerPort: 8081
+              name: management
+            - containerPort: 8082
+              name: metrics
+          resources:
+            limits:
+              nvidia.com/gpu: "1"
+          volumeMounts:
+            - name: ml-volume
+              mountPath: /var/ml/data
+      volumes:
+        - name: ml-volume
+          hostPath:
+            path: #@ data.values.model_dir
+            type: Directory
