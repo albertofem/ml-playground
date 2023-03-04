@@ -8,29 +8,28 @@ tasks:
     cmds:
       - "{{.SSH}} mkdir -p {{.MODEL_STORE_DIR}}"
 
-
   microk8s-install:
     cmds:
-      - "{{.SSH}} sudo snap install microk8s --channel=classic"
+      - "{{.SSH}} sudo snap install microk8s --classic"
 
   microk8s-plugins:
     cmds:
-      - "{{.SSH}} microk8s enable gpu"
-      - "{{.SSH}} microk8s enable registry"
+      - "{{.SSH}} sudo microk8s enable gpu"
+      - "{{.SSH}} sudo microk8s enable registry"
 
   microk8s-config:
     cmds:
-      - "{{.SSH}} microk8s config"
+      - "{{.SSH}} sudo microk8s config"
 
   microk8s-monitoring:
     cmds:
-      - "{{.SSH}} microk8s enable metrics-server"
-      - "{{.SSH}} microk8s enable observability"
+      - "{{.SSH}} sudo microk8s enable metrics-server"
+      - "{{.SSH}} sudo microk8s enable observability"
 
   nvidia-gpu-exporter:
     cmds:
       - "{{.SSH}} microk8s helm repo add utkuozdemir https://utkuozdemir.org/helm-charts"
-      - "{{.SSH}} microk8s helm install gpu-exporter utkuozdemir/nvidia-gpu-exporter --namespace observability"
+      - "{{.SSH}} sudo microk8s helm install gpu-exporter utkuozdemir/nvidia-gpu-exporter --namespace observability"
 
   argo-install:
     cmds:
@@ -45,6 +44,15 @@ tasks:
               "server",
               "--auth-mode=server"
             ]}]'
+
+  provision:
+    cmds:
+      - task: model-store-init
+      - task: microk8s-install
+      - task: microk8s-plugins
+      - task: microk8s-monitoring
+      - task: nvidia-gpu-exporter
+      - task: argo-install
 
   serve-prometheus:
     cmds:

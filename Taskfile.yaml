@@ -30,7 +30,14 @@ tasks:
 
   deploy-torchserve:
     cmds:
-      - ytt --data-value model_dir={{.MODEL_STORE_DIR}} -f k8s/torchserve.yml | kubectl create -f -
+      - ytt --data-value model_dir={{.MODEL_STORE_DIR}} -f k8s/torchserve.yml | kubectl apply -f -
+      - kubectl apply -f k8s/torchserve-service.yml
+      - kubectl apply -f k8s/torchserve-servicemonitor.yml
+
+
+  serve-torch:
+    cmds:
+      - "kubectl -n inference port-forward svc/bert-spam-detector 8080:8080"
 
   train:
     cmds:

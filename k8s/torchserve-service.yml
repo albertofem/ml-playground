@@ -1,0 +1,25 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: bert-spam-detector
+  namespace: inference
+  labels:
+    app.kubernetes.io/name: bert-spam-detector
+    release: kube-prom-stack
+spec:
+  selector:
+    app.kubernetes.io/name: bert-spam-detector
+    release: kube-prom-stack
+  ports:
+    - name: inference
+      protocol: TCP
+      port: 8080
+      targetPort: inference
+    - name: management
+      protocol: TCP
+      port: 8081
+      targetPort: management
+    - name: metrics
+      protocol: TCP
+      port: 8082
+      targetPort: metrics

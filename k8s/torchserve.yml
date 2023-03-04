@@ -6,16 +6,18 @@ metadata:
   name: bert-spam-detector
   namespace: inference
   labels:
-    app: bert-spam-detector
+    app.kubernetes.io/name: bert-spam-detector
+    release: kube-prom-stack
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: bert-spam-detector
+      app.kubernetes.io/name: bert-spam-detector
   template:
     metadata:
       labels:
-        app: bert-spam-detector
+        app.kubernetes.io/name: bert-spam-detector
+        release: kube-prom-stack
     spec:
       containers:
         - name: bert-spam-detector-torchserve

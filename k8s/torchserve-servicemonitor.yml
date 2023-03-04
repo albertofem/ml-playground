@@ -1,0 +1,15 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: torchserve-monitor
+  namespace: inference
+  labels:
+    release: kube-prom-stack # need this as it's hardcoded in the kube prometheus stack helm deployment
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: bert-spam-detector
+  endpoints:
+    - port: metrics
+      interval: 5s
+      path: /metrics

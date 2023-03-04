@@ -1,4 +1,4 @@
-FROM python:3.9-slim as builder
+FROM python:3.8-slim as builder
 
 WORKDIR /app
 
@@ -6,12 +6,12 @@ ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends gcc
+    apt-get install -y --no-install-recommends gcc git
 
 COPY requirements.txt .
 RUN pip wheel --no-cache-dir --no-deps --wheel-dir /app/wheels -r requirements.txt
 
-FROM python:3.9-slim
+FROM python:3.8-slim
 
 WORKDIR /app
 
