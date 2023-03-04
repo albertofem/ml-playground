@@ -10,6 +10,7 @@ In addition, I wanted to explore LLMs and general DL algorithms and provide a qu
 * Torchserve for model inference
 * Terraform for spinning up Lambda Cloud clusters
 * Prometheus, Grafana, Loki for metrics and general observability
+* Argo for workflows
 
 I have also included an example model, a BERT model with a spam detector fine-tuning, and plan to add more in the future. It's worth noting that this list of technologies will grow as the project evolves.
 
