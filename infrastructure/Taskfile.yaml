@@ -1,5 +1,8 @@
 version: '3'
 
+includes:
+  lambda: lambda-cloud.yml
+
 env:
   SSH: '{{if .REMOTE_HOST}}ssh {{.REMOTE_HOST_USERNAME}}@{{.REMOTE_HOST}}{{else}}{{end}}'
 

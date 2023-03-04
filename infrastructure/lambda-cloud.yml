@@ -1,0 +1,19 @@
+version: '3'
+
+tasks:
+  lambda-cloud-launch-instance:
+    cmds:
+      - > 
+        curl -X POST https://cloud.lambdalabs.com/api/v1/instance-operations/launch \
+          -u "{{.LAMBDA_CLOUD_API_KEY}}:" \
+          -H "Content-Type: application\json" \
+          -d '{
+            "name": "ml-playground-1",
+            "region_name": "us-west-1",
+            "instance_type_name": "gpu_1x_a10",
+            "ssh_key_names": [
+              "{{.LAMBDA_CLOUD_SSH_KEY}}"
+            ],
+            "file_system_names": [],
+            "quantity": 1
+          }'
