@@ -8,12 +8,44 @@ tasks:
           -u "{{.LAMBDA_CLOUD_API_KEY}}:" \
           -H "Content-Type: application\json" \
           -d '{
-            "name": "ml-playground-1",
-            "region_name": "us-west-1",
-            "instance_type_name": "gpu_1x_a10",
+            "name": "{{.LAMBDA_CLOUD_INSTANCE_NAME}}",
+            "region_name": "{{.LAMBDA_CLOUD_REGION}}",
+            "instance_type_name": "{{.LAMBDA_CLOUD_INSTANCE_TYPE}}",
             "ssh_key_names": [
               "{{.LAMBDA_CLOUD_SSH_KEY}}"
             ],
             "file_system_names": [],
             "quantity": 1
           }'
+
+  lambda-cloud-terminate-instance:
+    cmds:
+      - >
+        curl -X POST https://cloud.lambdalabs.com/api/v1/instance-operations/terminate \
+          -u "{{.LAMBDA_CLOUD_API_KEY}}:" \
+          -H "Content-Type: application\json" \
+          -d '{
+            "instance_ids": [
+            "{{.INSTANCE_ID}}"
+            ]
+          }'
+    vars:
+      INSTANCE_ID:
+        sh: "task infrastructure:lambda:lambda-cloud-get-instance-id"
+
+  lambda-cloud-get-instance-id:
+    cmds:
+      - >
+        curl -s -X GET https://cloud.lambdalabs.com/api/v1/instances?name={{.LAMBDA_CLOUD_INSTANCE_NAME}} \
+          -u "{{.LAMBDA_CLOUD_API_KEY}}:" \
+          -H "Content-Type: application\json" \
+          | jq -r '.data[0].id'
+  
+
+  lambda-cloud-get-instance-ip:
+    cmds:
+      - >
+        curl -s -X GET https://cloud.lambdalabs.com/api/v1/instances?name={{.LAMBDA_CLOUD_INSTANCE_NAME}} \
+          -u "{{.LAMBDA_CLOUD_API_KEY}}:" \
+          -H "Content-Type: application\json" \
+          | jq -r '.data[0].ip'

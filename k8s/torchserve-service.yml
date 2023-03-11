@@ -1,14 +1,14 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: bert-spam-detector
+  name: torchserve
   namespace: inference
   labels:
-    app.kubernetes.io/name: bert-spam-detector
+    app.kubernetes.io/name: torchserve
     release: kube-prom-stack
 spec:
   selector:
-    app.kubernetes.io/name: bert-spam-detector
+    app.kubernetes.io/name: torchserve
     release: kube-prom-stack
   ports:
     - name: inference

@@ -8,7 +8,7 @@ metadata:
 spec:
   selector:
     matchLabels:
-      app.kubernetes.io/name: bert-spam-detector
+      app.kubernetes.io/name: torchserve
   endpoints:
     - port: metrics
       interval: 5s

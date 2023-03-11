@@ -3,7 +3,7 @@ version: '3'
 includes:
   lambda: lambda-cloud.yml
 
-env:
+vars:
   SSH: '{{if .REMOTE_HOST}}ssh {{.REMOTE_HOST_USERNAME}}@{{.REMOTE_HOST}}{{else}}{{end}}'
 
 tasks:
@@ -22,7 +22,10 @@ tasks:
 
   microk8s-config:
     cmds:
-      - "{{.SSH}} sudo microk8s config"
+      - |
+        {{.SSH}} sudo microk8s config | sed -E 's/certificate-authority-data:.*/insecure-skip-tls-verify: true/g' | sed -E '
+          s#https://[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+:[0-9]+#https://{{.REMOTE_HOST}}:16443#g
+        ' > .kube/config
 
   microk8s-monitoring:
     cmds:
@@ -31,12 +34,12 @@ tasks:
 
   nvidia-gpu-exporter:
     cmds:
-      - "{{.SSH}} microk8s helm repo add utkuozdemir https://utkuozdemir.org/helm-charts"
-      - "{{.SSH}} sudo microk8s helm install gpu-exporter utkuozdemir/nvidia-gpu-exporter --namespace observability"
+      - "{{.SSH}} sudo microk8s helm repo add utkuozdemir https://utkuozdemir.org/helm-charts"
+      - "{{.SSH}} sudo microk8s helm install gpu-exporter utkuozdemir/nvidia-gpu-exporter --namespace observability || true"
 
   argo-install:
     cmds:
-      - "kubectl create namespace argo &2>1"
+      - "kubectl create namespace argo || true"
       - "kubectl apply -n argo -f https://github.com/argoproj/argo-workflows/releases/download/v3.4.5/install.yaml"
       - >  
           kubectl patch deployment \
@@ -50,6 +53,7 @@ tasks:
 
   provision:
     cmds:
+      - task: microk8s-config
       - task: model-store-init
       - task: microk8s-install
       - task: microk8s-plugins

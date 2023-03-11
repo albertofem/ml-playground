@@ -10,21 +10,21 @@ spec:
   templates:
     - name: bert-spam-detector
       steps:
-      - - name: bert-spam-detector-training
-          template: bert-spam-detector-training
-      - - name: bert-spam-detector-archive
-          template: bert-spam-detector-archive
+        - - name: bert-spam-detector-training
+            template: bert-spam-detector-training
+        - - name: bert-spam-detector-archive
+            template: bert-spam-detector-archive
 
     - name: bert-spam-detector-training
       container:
-        image: localhost:32000/bert-spam-detector-train:latest
+        image: localhost:32000/ml-playground:latest
         command: ["python"]
         args:
           - training/train.py
           - --training_data_file
           - data/spam-labels.csv
           - --model_output_dir
-          - /var/ml/data/bert-spam-detector/
+          - /var/ml/data/torchserve/
           - --transformer_cache_dir
           - /var/ml/data/cache/
           - --bert_revision
@@ -37,7 +37,7 @@ spec:
             mountPath: /var/ml/data
     - name: bert-spam-detector-archive
       container:
-        image: localhost:32000/bert-spam-detector-train:latest
+        image: localhost:32000/ml-playground:latest
         command: ["torch-model-archiver"]
         args:
           - --model-name
@@ -45,11 +45,11 @@ spec:
           - --version
           - "1.0"
           - --serialized-file
-          - /var/ml/data/bert-spam-detector/pytorch_model.bin
+          - /var/ml/data/torchserve/pytorch_model.bin
           - --handler
           - inference/transformerhandler.py
           - --export-path
-          - /var/ml/data/bert-spam-detector/
+          - /var/ml/data/torchserve/
           - --force
           - --extra-files
           - /var/ml/data/cache/models--bert-base-uncased/snapshots/0a6aa9128b6194f4f3c4db429b6cb4891cdb421b/config.json,/var/ml/data/cache/models--bert-base-uncased/snapshots/0a6aa9128b6194f4f3c4db429b6cb4891cdb421b/tokenizer.json,/var/ml/data/cache/models--bert-base-uncased/snapshots/0a6aa9128b6194f4f3c4db429b6cb4891cdb421b/tokenizer_config.json,/var/ml/data/cache/models--bert-base-uncased/snapshots/0a6aa9128b6194f4f3c4db429b6cb4891cdb421b/vocab.txt

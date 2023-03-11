@@ -3,29 +3,29 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: bert-spam-detector
+  name: torchserve
   namespace: inference
   labels:
-    app.kubernetes.io/name: bert-spam-detector
+    app.kubernetes.io/name: torchserve
     release: kube-prom-stack
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/name: bert-spam-detector
+      app.kubernetes.io/name: torchserve
   template:
     metadata:
       labels:
-        app.kubernetes.io/name: bert-spam-detector
+        app.kubernetes.io/name: torchserve
         release: kube-prom-stack
     spec:
       containers:
-        - name: bert-spam-detector-torchserve
-          image: localhost:32000/bert-spam-detector-train:latest
+        - name: torchserve-torchserve
+          image: localhost:32000/torchserve-train:latest
           command: ["torchserve"]
           args:
           - --model-store
-          - /var/ml/data/bert-spam-detector/
+          - /var/ml/data/torchserve/
           - --models
           - all
           - --foreground

@@ -1,45 +1,24 @@
 version: '3'
 
+dotenv: ['.env']
+
 includes:
   infrastructure: ./infrastructure
+  models: ./models
 
-env:
+vars:
   DOCKER_REPOSITORY: '{{if .REMOTE_HOST}}{{.REMOTE_HOST}}{{else}}localhost{{end}}:32000' # 32000 microk8s registry port
 
 tasks:
-  docker-train:
+  docker-build:
     cmds:
-      - docker build . -t {{.DOCKER_REPOSITORY}}/bert-spam-detector-train:latest
+      - docker build . -t {{.DOCKER_REPOSITORY}}/ml-playground:latest
 
-  docker-train-push:
+  docker-push:
     cmds:
-      - docker push {{.DOCKER_REPOSITORY}}/bert-spam-detector-train
+      - docker push {{.DOCKER_REPOSITORY}}/ml-playground
 
   docker:
     cmds:
-      - task: docker-train
-      - task: docker-train-push
-
-  deploy-train:
-    cmds:
-      - ytt --data-value model_dir={{.MODEL_STORE_DIR}} -f k8s/train.yml | kubectl create -f -
-
-  deploy-clean-torchserve:
-    cmds:
-      - kubectl delete deploy bert-spam-detector -n inference
-
-  deploy-torchserve:
-    cmds:
-      - ytt --data-value model_dir={{.MODEL_STORE_DIR}} -f k8s/torchserve.yml | kubectl apply -f -
-      - kubectl apply -f k8s/torchserve-service.yml
-      - kubectl apply -f k8s/torchserve-servicemonitor.yml
-
-
-  serve-torch:
-    cmds:
-      - "kubectl -n inference port-forward svc/bert-spam-detector 8080:8080"
-
-  train:
-    cmds:
-      - task: docker
-      - task: deploy-train
+      - task: docker-build
+      - task: docker-push

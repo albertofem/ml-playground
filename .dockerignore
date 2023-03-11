@@ -2,3 +2,5 @@ venv/
 *.pt
 .cache
 .idea
+.kube
+Taskfile.yml
