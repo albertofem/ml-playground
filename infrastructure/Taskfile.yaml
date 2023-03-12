@@ -53,12 +53,12 @@ tasks:
 
   provision:
     cmds:
-      - task: microk8s-config
       - task: model-store-init
       - task: microk8s-install
       - task: microk8s-plugins
       - task: microk8s-monitoring
       - task: nvidia-gpu-exporter
+      - task: microk8s-config
       - task: argo-install
 
   serve-prometheus:

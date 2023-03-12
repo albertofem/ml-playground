@@ -6,23 +6,6 @@ env:
 tasks:
   deploy-train:
     cmds:
-      - ytt --data-value model_dir={{.MODEL_STORE_DIR}} -f k8s/train.yml | kubectl create -f -
-
-  deploy-clean-torchserve:
-    cmds:
-      - kubectl delete deploy bert-spam-detector -n inference
-
-  deploy-torchserve:
-    cmds:
-      - ytt --data-value model_dir={{.MODEL_STORE_DIR}} -f k8s/torchserve.yml | kubectl apply -f -
-      - kubectl apply -f k8s/torchserve-service.yml
-      - kubectl apply -f k8s/torchserve-servicemonitor.yml
-
-  serve-torch:
-    cmds:
-      - "kubectl -n inference port-forward svc/bert-spam-detector 8080:8080"
-
-  train:
-    cmds:
-      - task: docker
-      - task: deploy-train
+      - kubectl scale --replicas=0 deployment/torchserve -n torchserve
+      - ytt --data-value model_dir={{.MODEL_STORE_DIR}} -f k8s/workflow-train.yml | kubectl create -f -
+      - kubectl scale --replicas=1 deployment/torchserve -n torchserve

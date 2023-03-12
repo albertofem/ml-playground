@@ -4,7 +4,7 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: torchserve
-  namespace: inference
+  namespace: torchserve
   labels:
     app.kubernetes.io/name: torchserve
     release: kube-prom-stack
@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
         - name: torchserve-torchserve
-          image: localhost:32000/torchserve-train:latest
+          image: localhost:32000/ml-playground:latest
           command: ["torchserve"]
           args:
           - --model-store

@@ -1,4 +1,6 @@
 version: '3'
 
 includes:
-  bert-spam-detector: ./bert-spam-detector
+  bert-spam-detector:
+    taskfile: ./bert-spam-detector
+    dir: ./bert-spam-detector

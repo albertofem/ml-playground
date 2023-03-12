@@ -20,11 +20,11 @@ spec:
         image: localhost:32000/ml-playground:latest
         command: ["python"]
         args:
-          - training/train.py
+          - ./models/bert-spam-detector/train.py
           - --training_data_file
-          - data/spam-labels.csv
+          - ./models/bert-spam-detector/data/spam-labels.csv
           - --model_output_dir
-          - /var/ml/data/torchserve/
+          - /var/ml/data/torchserve/.staging/bert-spam-detector/1.0/
           - --transformer_cache_dir
           - /var/ml/data/cache/
           - --bert_revision
@@ -45,9 +45,9 @@ spec:
           - --version
           - "1.0"
           - --serialized-file
-          - /var/ml/data/torchserve/pytorch_model.bin
+          - /var/ml/data/torchserve/.staging/bert-spam-detector/1.0/pytorch_model.bin
           - --handler
-          - inference/transformerhandler.py
+          - ./models/bert-spam-detector/transformerhandler.py
           - --export-path
           - /var/ml/data/torchserve/
           - --force

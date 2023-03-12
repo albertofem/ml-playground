@@ -2,7 +2,7 @@ apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
   name: torchserve-monitor
-  namespace: inference
+  namespace: torchserve
   labels:
     release: kube-prom-stack # need this as it's hardcoded in the kube prometheus stack helm deployment
 spec:

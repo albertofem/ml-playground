@@ -22,3 +22,14 @@ tasks:
     cmds:
       - task: docker-build
       - task: docker-push
+
+  torchserve-deploy:
+    cmds:
+      - kubectl apply -f k8s/torchserve-namespace.yml
+      - ytt --data-value model_dir={{.MODEL_STORE_DIR}} -f k8s/torchserve.yml | kubectl apply -f -
+      - kubectl apply -f k8s/torchserve-service.yml
+      - kubectl apply -f k8s/torchserve-servicemonitor.yml
+
+  torchserve-inference-api:
+    cmds:
+      - "kubectl -n torchserve port-forward service/torchserve 8080:8080"
